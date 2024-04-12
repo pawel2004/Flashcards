@@ -131,7 +131,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
                     icon="test-tube"
                     label="BEGIN TEST"
                     disabled={flashCardsArray.length === 0}
-                    onPress={() => navigation.navigate('Test', { normalMode: testNormalMode, deckId: deckId })}
+                    onPress={() => navigation.navigate('Test', { normalMode: testNormalMode, flashCards: flashCardsArray })}
                 />
                 <FAB
                     icon="plus"

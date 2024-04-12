@@ -6,9 +6,9 @@ import { Button, IconButton, Dialog, Portal, Text, Surface, useTheme, Chip } fro
 
 export default TestScreen = ({ route, navigation }) => {
 
-    const { normalMode, deckId } = route.params;
+    const { normalMode, flashCards } = route.params;
 
-    let [flashCardsArray, setFlashCardsArray] = useState([]);
+    let [flashCardsArray, setFlashCardsArray] = useState(flashCards);
     const [endDialogVisible, setEndDialogVisible] = useState(false);
     const [roundDialogVisible, setRoundDialogVisible] = useState(false);
     const [currFlashCard, setCurrentFlashcard] = useState({});
@@ -32,17 +32,9 @@ export default TestScreen = ({ route, navigation }) => {
     }
 
     useEffect(() => {
-        const getFlashCards = async () => {
-            try {
-                const flashCards = await Database.getFlashCardsFromDeck(deckId);
-                shuffleArray(flashCards);
-                setFlashCardsArray(flashCards);
-                setCurrentFlashcard(flashCards[0]);
-            } catch (err) {
-
-            }
-        };
-        getFlashCards();
+        shuffleArray(flashCardsArray);
+        setFlashCardsArray(flashCardsArray);
+        setCurrentFlashcard(flashCardsArray[0]);
     }, []);
 
     const handleRounds = () => {
