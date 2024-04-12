@@ -20,19 +20,19 @@ export default TestScreen = ({ route, navigation }) => {
 
     const theme = useTheme();
 
-    // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
     const shuffleArray = (array) => {
-        for (let i = array.length - 1; i > 0; i--) {
-            let j = Math.floor(Math.random() * (i + 1));
-            let temp = array[i];
-            array[i] = array[j];
-            array[j] = temp;
+        const resultArray = [];
+        while (array.length !== 0) {
+            const random = Math.floor(Math.random() * array.length);
+            resultArray.push(array[random]);
+            array = array.filter((_, i) => i !== random);
         }
+        return resultArray;
     }
 
     useEffect(() => {
-        const localFlashArray = [...flashCards];
-        shuffleArray(localFlashArray);
+        let localFlashArray = [...flashCards];
+        localFlashArray = shuffleArray(localFlashArray);
         setFlashCardsArray(localFlashArray);
         setCurrentFlashcard(localFlashArray[0]);
     }, []);
@@ -54,8 +54,7 @@ export default TestScreen = ({ route, navigation }) => {
         setRoundDialogVisible(false);
         setSuccessAmount(0);
         setErrorsAmount(0);
-        flashCardsArray = backupArray;
-        shuffleArray(flashCardsArray);
+        flashCardsArray = shuffleArray(backupArray);
         setCurrentFlashcard(flashCardsArray[0]);
         setFlashCardsArray(backupArray);
         setBackupArray([]);
