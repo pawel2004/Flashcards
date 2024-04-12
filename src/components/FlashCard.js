@@ -3,7 +3,7 @@ import { StyleSheet, ToastAndroid } from "react-native";
 import { Card, Divider, IconButton, Text, TextInput } from "react-native-paper";
 import Database from "../services/Database";
 
-export default FlashCard = ({ flashId, front, rear, setFlashCardsArray, openDialog, setSurfaceVisible }) => {
+export default FlashCard = ({ flashId, front, rear, setFlashCardsArray, openDialog, setSurfaceVisible, setEditedFlashesCounter, editedFlashesCounter }) => {
 
     const [editMode, setEditMode] = useState(false);
     const [editedFront, setEditedFront] = useState(front);
@@ -19,6 +19,9 @@ export default FlashCard = ({ flashId, front, rear, setFlashCardsArray, openDial
                 }
                 return v;
             }));
+            setEditedFlashesCounter(--editedFlashesCounter);
+            if (editedFlashesCounter === 0)
+                setSurfaceVisible(true);
             setEditMode(false);
         } catch (err) {
             ToastAndroid.showWithGravity(
@@ -49,13 +52,17 @@ export default FlashCard = ({ flashId, front, rear, setFlashCardsArray, openDial
                     <IconButton icon="check" onPress={handleEdit} />
                     :
                     <IconButton icon="pencil" onPress={() => {
-                        setSurfaceVisible(false);
+                        if (editedFlashesCounter === 0)
+                            setSurfaceVisible(false);
+                        setEditedFlashesCounter(++editedFlashesCounter);
                         setEditMode(true);
                     }} />
                 }
                 {editMode ?
                     <IconButton icon="cancel" onPress={() => {
-                        setSurfaceVisible(true);
+                        setEditedFlashesCounter(--editedFlashesCounter);
+                        if (editedFlashesCounter === 0)
+                            setSurfaceVisible(true);
                         setEditMode(false);
                     }} />
                     :

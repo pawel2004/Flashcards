@@ -18,6 +18,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
     const [testNormalMode, setTestNormalMode] = useState(true);
     const [toggleState, setToggleState] = useState('unchecked');
     const [surfaceVisible, setSurfaceVisible] = useState(true);
+    const [editedFlashesCounter, setEditedFlashesCounter] = useState(0);
 
     const screenWidth = Dimensions.get('window').width;
 
@@ -124,7 +125,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
             </Portal>
             <FlatList
                 data={flashCardsArray}
-                renderItem={(dataPiece) => <FlashCard flashId={dataPiece.item.FlashcardId} front={dataPiece.item.Front} rear={dataPiece.item.Rear} setFlashCardsArray={setFlashCardsArray} openDialog={openDeleteDialog} setSurfaceVisible={setSurfaceVisible} />}
+                renderItem={(dataPiece) => <FlashCard flashId={dataPiece.item.FlashcardId} front={dataPiece.item.Front} rear={dataPiece.item.Rear} setFlashCardsArray={setFlashCardsArray} openDialog={openDeleteDialog} setSurfaceVisible={setSurfaceVisible} setEditedFlashesCounter={setEditedFlashesCounter} editedFlashesCounter={editedFlashesCounter} />}
                 contentContainerStyle={styles.fl}
             />
             <Surface elevation={0} style={{ width: screenWidth, ...styles.button_surface, display: surfaceVisible ? 'block' : 'none' }}>
