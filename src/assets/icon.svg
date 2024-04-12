@@ -7,7 +7,7 @@
    viewBox="0 0 270.93333 270.93334"
    version="1.1"
    id="svg5"
-   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
    sodipodi:docname="icon.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -24,15 +24,17 @@
      inkscape:document-units="mm"
      showgrid="false"
      units="px"
-     inkscape:zoom="0.52410025"
-     inkscape:cx="427.39915"
-     inkscape:cy="601.98407"
-     inkscape:window-width="1920"
-     inkscape:window-height="1017"
-     inkscape:window-x="1272"
+     inkscape:zoom="0.37059484"
+     inkscape:cx="453.32525"
+     inkscape:cy="473.56299"
+     inkscape:window-width="1366"
+     inkscape:window-height="705"
+     inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
+     inkscape:current-layer="layer1"
+     inkscape:showpageshadow="2"
+     inkscape:deskcolor="#d1d1d1" />
   <defs
      id="defs2" />
   <g
@@ -41,7 +43,7 @@
      id="layer1">
     <g
        id="g1340"
-       transform="matrix(0.70111778,0,0,0.70111778,41.862388,41.922752)">
+       transform="matrix(0.4844977,0,0,0.4844977,70.78273,70.824444)">
       <rect
          style="fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-width:2.64583;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
          id="rect1147"

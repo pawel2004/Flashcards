@@ -12,6 +12,8 @@ export default DeckScreen = ({ navigation }) => {
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [deckNameInputText, setDeckNameInputText] = useState('');
     const [deckIdToDelete, setDeckIdToDelete] = useState('');
+    const [addButtonVisible, setAddButtonVisible] = useState(true);
+    const [editDecksCount, setEditDecksCount] = useState(0);
 
     useEffect(() => {
         const getDecks = async () => {
@@ -23,7 +25,7 @@ export default DeckScreen = ({ navigation }) => {
             }
         };
         getDecks();
-    });
+    }, []);
 
     const nameRequired = () => {
         return deckNameInputText === '';
@@ -32,7 +34,11 @@ export default DeckScreen = ({ navigation }) => {
     const handleDeckAdd = async () => {
         if (deckNameInputText !== '') {
             try {
-                await Database.addDeck(deckNameInputText);
+                const newId = await Database.addDeck(deckNameInputText);
+                setDecksArray([...decksArray, {
+                    DeckId: newId,
+                    Name: deckNameInputText
+                }])
                 setDeckNameInputText('');
                 setAddDialogVisible(false);
             } catch (err) {
@@ -48,6 +54,7 @@ export default DeckScreen = ({ navigation }) => {
     const handleDeckDelete = async () => {
         try {
             await Database.deleteDeck(deckIdToDelete);
+            setDecksArray(decksArray.filter((v) => v.DeckId !== deckIdToDelete));
             ToastAndroid.showWithGravity(
                 'Deleted!',
                 ToastAndroid.SHORT,
@@ -100,12 +107,13 @@ export default DeckScreen = ({ navigation }) => {
             </Portal>
             <FlatList
                 data={decksArray}
-                renderItem={(dataPiece) => <DeckCard deckId={dataPiece.item.DeckId} deckName={dataPiece.item.Name} openDialog={openDeleteDialog} navigation={navigation} />}
+                renderItem={(dataPiece) => <DeckCard deckId={dataPiece.item.DeckId} deckName={dataPiece.item.Name} openDialog={openDeleteDialog} setDecksArray={setDecksArray} navigation={navigation} setAddButtonVisible={setAddButtonVisible} setEditDecksCount={setEditDecksCount} editDecksCount={editDecksCount} />}
                 contentContainerStyle={styles.fl}
             />
             <FAB
                 icon="plus"
                 onPress={() => setAddDialogVisible(true)}
+                visible={addButtonVisible}
                 style={styles.fab}
             />
         </View>
@@ -123,6 +131,6 @@ const styles = StyleSheet.create({
         bottom: 0
     },
     fl: {
-        paddingBottom: 100
+        paddingBottom: 120
     }
 });

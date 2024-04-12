@@ -17,6 +17,8 @@ export default FlashCardsScreen = ({ route, navigation }) => {
     const [flashIdToDelete, setFlashIdToDelete] = useState('');
     const [testNormalMode, setTestNormalMode] = useState(true);
     const [toggleState, setToggleState] = useState('unchecked');
+    const [surfaceVisible, setSurfaceVisible] = useState(true);
+    const [editedFlashesCounter, setEditedFlashesCounter] = useState(0);
 
     const screenWidth = Dimensions.get('window').width;
 
@@ -34,11 +36,17 @@ export default FlashCardsScreen = ({ route, navigation }) => {
             }
         };
         getFlashCards();
-    });
+    }, []);
 
     const handleFlashCardAdd = async () => {
         try {
-            await Database.addFlashCard(deckId, frontText, rearText);
+            const newId = await Database.addFlashCard(deckId, frontText, rearText);
+            setFlashCardsArray([...flashCardsArray, {
+                FlashcardId: newId,
+                DeckId: deckId,
+                Front: frontText,
+                Rear: rearText
+            }]);
             setFrontText('');
             setRearText('');
             setAddDialogVisible(false);
@@ -55,6 +63,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
     const handleFlashCardDelete = async () => {
         try {
             await Database.deleteFlashCard(flashIdToDelete);
+            setFlashCardsArray(flashCardsArray.filter(v => v.FlashcardId !== flashIdToDelete));
             ToastAndroid.showWithGravity(
                 'Deleted!',
                 ToastAndroid.SHORT,
@@ -94,8 +103,8 @@ export default FlashCardsScreen = ({ route, navigation }) => {
                     <Dialog.Icon icon='plus' />
                     <Dialog.Title>Add new flashcard</Dialog.Title>
                     <Dialog.Content style={styles.textInputContainer}>
-                        <TextInput label={'Front'} multiline={true} onChangeText={(text) => setFrontText(text)} />
-                        <TextInput label={'Rear'} multiline={true} onChangeText={(text) => setRearText(text)} />
+                        <TextInput label={'Front'} multiline={true} onChangeText={(text) => setFrontText(text)} numberOfLines={5} maxLength={100} />
+                        <TextInput label={'Rear'} multiline={true} onChangeText={(text) => setRearText(text)} numberOfLines={5} maxLength={100} />
                     </Dialog.Content>
                     <Dialog.Actions>
                         <Button onPress={() => setAddDialogVisible(false)}>Cancel</Button>
@@ -116,22 +125,22 @@ export default FlashCardsScreen = ({ route, navigation }) => {
             </Portal>
             <FlatList
                 data={flashCardsArray}
-                renderItem={(dataPiece) => <FlashCard flashId={dataPiece.item.FlashcardId} front={dataPiece.item.Front} rear={dataPiece.item.Rear} openDialog={openDeleteDialog} />}
+                renderItem={(dataPiece) => <FlashCard flashId={dataPiece.item.FlashcardId} front={dataPiece.item.Front} rear={dataPiece.item.Rear} setFlashCardsArray={setFlashCardsArray} openDialog={openDeleteDialog} setSurfaceVisible={setSurfaceVisible} setEditedFlashesCounter={setEditedFlashesCounter} editedFlashesCounter={editedFlashesCounter} />}
                 contentContainerStyle={styles.fl}
             />
-            <Surface elevation={0} style={{ width: screenWidth, ...styles.button_surface }}>
+            <Surface elevation={0} style={{ width: screenWidth, ...styles.button_surface, display: surfaceVisible ? 'block' : 'none' }}>
                 <ToggleButton
                     icon="repeat-variant"
                     status={toggleState}
                     iconColor={useTheme().colors.primary}
                     onPress={() => toggleButton()}
-                    style={styles.tgb}
+                    style={{ ...styles.tgb, backgroundColor: testNormalMode ? useTheme().colors.primaryContainer : useTheme().colors.secondaryContainer }}
                 />
                 <FAB
                     icon="test-tube"
                     label="BEGIN TEST"
                     disabled={flashCardsArray.length === 0}
-                    onPress={() => navigation.navigate('Test', { normalMode: testNormalMode, deckId: deckId })}
+                    onPress={() => navigation.navigate('Test', { normalMode: testNormalMode, flashCards: flashCardsArray })}
                 />
                 <FAB
                     icon="plus"
@@ -162,6 +171,7 @@ const styles = StyleSheet.create({
     },
     tgb: {
         width: 56,
-        height: 56
+        height: 56,
+        borderRadius: 15
     }
 });

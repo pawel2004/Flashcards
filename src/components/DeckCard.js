@@ -3,7 +3,7 @@ import { StyleSheet, ToastAndroid } from "react-native";
 import { Card, IconButton, Text, TextInput, HelperText } from "react-native-paper";
 import Database from "../services/Database";
 
-export default DeckCard = ({ deckId, deckName, openDialog, navigation }) => {
+export default DeckCard = ({ deckId, deckName, openDialog, setDecksArray, navigation, setAddButtonVisible, editDecksCount, setEditDecksCount }) => {
 
     const [editMode, setEditMode] = useState(false);
     const [editedName, setEditedName] = useState(deckName);
@@ -16,6 +16,14 @@ export default DeckCard = ({ deckId, deckName, openDialog, navigation }) => {
         if (editedName !== '') {
             try {
                 await Database.editDeck(deckId, editedName);
+                setDecksArray((decksArray) => decksArray.map((v) => {
+                    if (v.DeckId === deckId)
+                        v.Name = editedName;
+                    return v;
+                }));
+                setEditDecksCount(--editDecksCount);
+                if (editDecksCount === 0)
+                    setAddButtonVisible(true);
                 setEditMode(false);
             } catch (err) {
                 ToastAndroid.showWithGravity(
@@ -48,10 +56,20 @@ export default DeckCard = ({ deckId, deckName, openDialog, navigation }) => {
                 {editMode ?
                     <IconButton icon="check" onPress={handleEdit} />
                     :
-                    <IconButton icon="pencil" onPress={() => setEditMode(true)} />
+                    <IconButton icon="pencil" onPress={() => {
+                        if (editDecksCount === 0)
+                            setAddButtonVisible(false);
+                        setEditDecksCount(++editDecksCount);
+                        setEditMode(true);
+                    }} />
                 }
                 {editMode ?
-                    <IconButton icon="cancel" onPress={() => setEditMode(false)} />
+                    <IconButton icon="cancel" onPress={() => {
+                        setEditDecksCount(--editDecksCount);
+                        if (editDecksCount === 0)
+                            setAddButtonVisible(true);
+                        setEditMode(false);
+                    }} />
                     :
                     <IconButton icon="delete" onPress={() => openDialog(deckId)} />
                 }
