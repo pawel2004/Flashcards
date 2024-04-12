@@ -52,7 +52,7 @@ export default DeckScreen = ({ navigation }) => {
     const handleDeckDelete = async () => {
         try {
             await Database.deleteDeck(deckIdToDelete);
-            setDecksArray(decksArray.filter((v) => v.DeckId != deckIdToDelete));
+            setDecksArray(decksArray.filter((v) => v.DeckId !== deckIdToDelete));
             ToastAndroid.showWithGravity(
                 'Deleted!',
                 ToastAndroid.SHORT,

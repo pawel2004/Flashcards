@@ -34,11 +34,17 @@ export default FlashCardsScreen = ({ route, navigation }) => {
             }
         };
         getFlashCards();
-    });
+    }, []);
 
     const handleFlashCardAdd = async () => {
         try {
-            await Database.addFlashCard(deckId, frontText, rearText);
+            const newId = await Database.addFlashCard(deckId, frontText, rearText);
+            setFlashCardsArray([...flashCardsArray, {
+                FlashcardId: newId,
+                DeckId: deckId,
+                Front: frontText,
+                Rear: rearText
+            }]);
             setFrontText('');
             setRearText('');
             setAddDialogVisible(false);
@@ -55,6 +61,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
     const handleFlashCardDelete = async () => {
         try {
             await Database.deleteFlashCard(flashIdToDelete);
+            setFlashCardsArray(flashCardsArray.filter(v => v.FlashcardId !== flashIdToDelete));
             ToastAndroid.showWithGravity(
                 'Deleted!',
                 ToastAndroid.SHORT,
@@ -116,7 +123,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
             </Portal>
             <FlatList
                 data={flashCardsArray}
-                renderItem={(dataPiece) => <FlashCard flashId={dataPiece.item.FlashcardId} front={dataPiece.item.Front} rear={dataPiece.item.Rear} openDialog={openDeleteDialog} />}
+                renderItem={(dataPiece) => <FlashCard flashId={dataPiece.item.FlashcardId} front={dataPiece.item.Front} rear={dataPiece.item.Rear} setFlashCardsArray={setFlashCardsArray} openDialog={openDeleteDialog} />}
                 contentContainerStyle={styles.fl}
             />
             <Surface elevation={0} style={{ width: screenWidth, ...styles.button_surface }}>
