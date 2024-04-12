@@ -56,7 +56,7 @@ export default TestScreen = ({ route, navigation }) => {
         setErrorsAmount(0);
         flashCardsArray = shuffleArray(backupArray);
         setCurrentFlashcard(flashCardsArray[0]);
-        setFlashCardsArray(backupArray);
+        setFlashCardsArray(flashCardsArray);
         setBackupArray([]);
         setReversed(false);
     }
