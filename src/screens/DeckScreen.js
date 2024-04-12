@@ -12,6 +12,8 @@ export default DeckScreen = ({ navigation }) => {
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [deckNameInputText, setDeckNameInputText] = useState('');
     const [deckIdToDelete, setDeckIdToDelete] = useState('');
+    const [addButtonVisible, setAddButtonVisible] = useState(true);
+    const [editDecksCount, setEditDecksCount] = useState(0);
 
     useEffect(() => {
         const getDecks = async () => {
@@ -105,12 +107,13 @@ export default DeckScreen = ({ navigation }) => {
             </Portal>
             <FlatList
                 data={decksArray}
-                renderItem={(dataPiece) => <DeckCard deckId={dataPiece.item.DeckId} deckName={dataPiece.item.Name} openDialog={openDeleteDialog} setDecksArray={setDecksArray} navigation={navigation} />}
+                renderItem={(dataPiece) => <DeckCard deckId={dataPiece.item.DeckId} deckName={dataPiece.item.Name} openDialog={openDeleteDialog} setDecksArray={setDecksArray} navigation={navigation} setAddButtonVisible={setAddButtonVisible} setEditDecksCount={setEditDecksCount} editDecksCount={editDecksCount} />}
                 contentContainerStyle={styles.fl}
             />
             <FAB
                 icon="plus"
                 onPress={() => setAddDialogVisible(true)}
+                visible={addButtonVisible}
                 style={styles.fab}
             />
         </View>
@@ -128,6 +131,6 @@ const styles = StyleSheet.create({
         bottom: 0
     },
     fl: {
-        paddingBottom: 100
+        paddingBottom: 120
     }
 });
