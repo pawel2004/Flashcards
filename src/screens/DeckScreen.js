@@ -23,7 +23,7 @@ export default DeckScreen = ({ navigation }) => {
             }
         };
         getDecks();
-    });
+    }, []);
 
     const nameRequired = () => {
         return deckNameInputText === '';
@@ -32,7 +32,11 @@ export default DeckScreen = ({ navigation }) => {
     const handleDeckAdd = async () => {
         if (deckNameInputText !== '') {
             try {
-                await Database.addDeck(deckNameInputText);
+                const newId = await Database.addDeck(deckNameInputText);
+                setDecksArray([...decksArray, {
+                    DeckId: newId,
+                    Name: deckNameInputText
+                }])
                 setDeckNameInputText('');
                 setAddDialogVisible(false);
             } catch (err) {
@@ -48,6 +52,7 @@ export default DeckScreen = ({ navigation }) => {
     const handleDeckDelete = async () => {
         try {
             await Database.deleteDeck(deckIdToDelete);
+            setDecksArray(decksArray.filter((v) => v.DeckId != deckIdToDelete));
             ToastAndroid.showWithGravity(
                 'Deleted!',
                 ToastAndroid.SHORT,
@@ -100,7 +105,7 @@ export default DeckScreen = ({ navigation }) => {
             </Portal>
             <FlatList
                 data={decksArray}
-                renderItem={(dataPiece) => <DeckCard deckId={dataPiece.item.DeckId} deckName={dataPiece.item.Name} openDialog={openDeleteDialog} navigation={navigation} />}
+                renderItem={(dataPiece) => <DeckCard deckId={dataPiece.item.DeckId} deckName={dataPiece.item.Name} openDialog={openDeleteDialog} setDecksArray={setDecksArray} navigation={navigation} />}
                 contentContainerStyle={styles.fl}
             />
             <FAB
