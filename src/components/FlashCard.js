@@ -36,13 +36,13 @@ export default FlashCard = ({ flashId, front, rear, setFlashCardsArray, openDial
         <Card style={styles.container}>
             <Card.Content style={styles.cc}>
                 {editMode ?
-                    <TextInput label={'Front'} defaultValue={front} onChangeText={(text) => setEditedFront(text)} />
+                    <TextInput label={'Front'} defaultValue={front} onChangeText={(text) => setEditedFront(text)} multiline={true} numberOfLines={5} maxLength={100} />
                     :
                     <Text variant="titleMedium">{front}</Text>
                 }
                 <Divider />
                 {editMode ?
-                    <TextInput label={'Rear'} defaultValue={rear} onChangeText={(text) => setEditedRear(text)} />
+                    <TextInput label={'Rear'} defaultValue={rear} onChangeText={(text) => setEditedRear(text)} multiline={true} numberOfLines={5} maxLength={100} />
                     :
                     <Text variant="titleMedium">{rear}</Text>
                 }

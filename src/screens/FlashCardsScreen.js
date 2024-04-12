@@ -103,8 +103,8 @@ export default FlashCardsScreen = ({ route, navigation }) => {
                     <Dialog.Icon icon='plus' />
                     <Dialog.Title>Add new flashcard</Dialog.Title>
                     <Dialog.Content style={styles.textInputContainer}>
-                        <TextInput label={'Front'} multiline={true} onChangeText={(text) => setFrontText(text)} />
-                        <TextInput label={'Rear'} multiline={true} onChangeText={(text) => setRearText(text)} />
+                        <TextInput label={'Front'} multiline={true} onChangeText={(text) => setFrontText(text)} numberOfLines={5} maxLength={100} />
+                        <TextInput label={'Rear'} multiline={true} onChangeText={(text) => setRearText(text)} numberOfLines={5} maxLength={100} />
                     </Dialog.Content>
                     <Dialog.Actions>
                         <Button onPress={() => setAddDialogVisible(false)}>Cancel</Button>
@@ -134,7 +134,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
                     status={toggleState}
                     iconColor={useTheme().colors.primary}
                     onPress={() => toggleButton()}
-                    style={styles.tgb}
+                    style={{ ...styles.tgb, backgroundColor: testNormalMode ? useTheme().colors.primaryContainer : useTheme().colors.secondaryContainer }}
                 />
                 <FAB
                     icon="test-tube"
@@ -171,6 +171,7 @@ const styles = StyleSheet.create({
     },
     tgb: {
         width: 56,
-        height: 56
+        height: 56,
+        borderRadius: 15
     }
 });

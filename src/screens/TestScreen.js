@@ -81,7 +81,7 @@ export default TestScreen = ({ route, navigation }) => {
         <View style={styles.container}>
             <StatusBar style="auto"></StatusBar>
             <Portal>
-                <Dialog visible={endDialogVisible} onDismiss={() => setEndDialogVisible(false)}>
+                <Dialog visible={endDialogVisible} onDismiss={() => navigation.goBack()}>
                     <Dialog.Icon icon='information' />
                     <Dialog.Title>Test finished!</Dialog.Title>
                     <Dialog.Content>
@@ -91,7 +91,7 @@ export default TestScreen = ({ route, navigation }) => {
                         <Button onPress={() => navigation.goBack()}>OK</Button>
                     </Dialog.Actions>
                 </Dialog>
-                <Dialog visible={roundDialogVisible} onDismiss={() => setRoundDialogVisible(false)}>
+                <Dialog visible={roundDialogVisible} onDismiss={() => handleNextRound()}>
                     <Dialog.Icon icon='information' />
                     <Dialog.Title>Round finished!</Dialog.Title>
                     <Dialog.Content>
@@ -110,9 +110,9 @@ export default TestScreen = ({ route, navigation }) => {
             </Surface>
             <Surface style={styles.card} elevation={1} onTouchStart={() => setReversed(true)}>
                 {reversed ?
-                    <Text variant="displayLarge">{normalMode ? currFlashCard.Rear : currFlashCard.Front}</Text>
+                    <Text variant="displayMedium" style={styles.text}>{normalMode ? currFlashCard.Rear : currFlashCard.Front}</Text>
                     :
-                    <Text variant="displayLarge">{normalMode ? currFlashCard.Front : currFlashCard.Rear}</Text>
+                    <Text variant="displayMedium" style={styles.text}>{normalMode ? currFlashCard.Front : currFlashCard.Rear}</Text>
                 }
                 {
                     reversed ?
@@ -135,6 +135,7 @@ const styles = StyleSheet.create({
     card: {
         flex: 1,
         padding: 16,
+        paddingBottom: 80,
         position: 'relative',
         borderRadius: 10,
         justifyContent: 'center',
@@ -149,5 +150,8 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         flexDirection: 'row',
         justifyContent: 'space-evenly'
+    },
+    text: {
+        textAlign: 'center'
     }
 });
