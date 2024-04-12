@@ -3,7 +3,7 @@ import { StyleSheet, ToastAndroid } from "react-native";
 import { Card, Divider, IconButton, Text, TextInput } from "react-native-paper";
 import Database from "../services/Database";
 
-export default FlashCard = ({ flashId, front, rear, setFlashCardsArray, openDialog }) => {
+export default FlashCard = ({ flashId, front, rear, setFlashCardsArray, openDialog, setSurfaceVisible }) => {
 
     const [editMode, setEditMode] = useState(false);
     const [editedFront, setEditedFront] = useState(front);
@@ -48,10 +48,16 @@ export default FlashCard = ({ flashId, front, rear, setFlashCardsArray, openDial
                 {editMode ?
                     <IconButton icon="check" onPress={handleEdit} />
                     :
-                    <IconButton icon="pencil" onPress={() => setEditMode(true)} />
+                    <IconButton icon="pencil" onPress={() => {
+                        setSurfaceVisible(false);
+                        setEditMode(true);
+                    }} />
                 }
                 {editMode ?
-                    <IconButton icon="cancel" onPress={() => setEditMode(false)} />
+                    <IconButton icon="cancel" onPress={() => {
+                        setSurfaceVisible(true);
+                        setEditMode(false);
+                    }} />
                     :
                     <IconButton icon="delete" onPress={() => openDialog(flashId)} />
                 }

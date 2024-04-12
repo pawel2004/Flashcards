@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Database from "../services/Database";
 import { Button, Dialog, FAB, Portal, TextInput, Text, Surface, ToggleButton, useTheme } from "react-native-paper";
 import FlashCard from "../components/FlashCard";
-import { useIsFocused } from "@react-navigation/native";
 
 export default FlashCardsScreen = ({ route, navigation }) => {
 
@@ -18,6 +17,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
     const [flashIdToDelete, setFlashIdToDelete] = useState('');
     const [testNormalMode, setTestNormalMode] = useState(true);
     const [toggleState, setToggleState] = useState('unchecked');
+    const [surfaceVisible, setSurfaceVisible] = useState(true);
 
     const screenWidth = Dimensions.get('window').width;
 
@@ -124,10 +124,10 @@ export default FlashCardsScreen = ({ route, navigation }) => {
             </Portal>
             <FlatList
                 data={flashCardsArray}
-                renderItem={(dataPiece) => <FlashCard flashId={dataPiece.item.FlashcardId} front={dataPiece.item.Front} rear={dataPiece.item.Rear} setFlashCardsArray={setFlashCardsArray} openDialog={openDeleteDialog} />}
+                renderItem={(dataPiece) => <FlashCard flashId={dataPiece.item.FlashcardId} front={dataPiece.item.Front} rear={dataPiece.item.Rear} setFlashCardsArray={setFlashCardsArray} openDialog={openDeleteDialog} setSurfaceVisible={setSurfaceVisible} />}
                 contentContainerStyle={styles.fl}
             />
-            <Surface elevation={0} style={{ width: screenWidth, ...styles.button_surface }}>
+            <Surface elevation={0} style={{ width: screenWidth, ...styles.button_surface, display: surfaceVisible ? 'block' : 'none' }}>
                 <ToggleButton
                     icon="repeat-variant"
                     status={toggleState}
