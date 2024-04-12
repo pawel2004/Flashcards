@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Database from "../services/Database";
 import { Button, Dialog, FAB, Portal, TextInput, Text, Surface, ToggleButton, useTheme } from "react-native-paper";
 import FlashCard from "../components/FlashCard";
+import { useIsFocused } from "@react-navigation/native";
 
 export default FlashCardsScreen = ({ route, navigation }) => {
 

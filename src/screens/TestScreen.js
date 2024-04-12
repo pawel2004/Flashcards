@@ -1,14 +1,13 @@
 import { View, StyleSheet, Dimensions } from "react-native";
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from "react";
-import Database from "../services/Database";
 import { Button, IconButton, Dialog, Portal, Text, Surface, useTheme, Chip } from "react-native-paper";
 
 export default TestScreen = ({ route, navigation }) => {
 
     const { normalMode, flashCards } = route.params;
 
-    let [flashCardsArray, setFlashCardsArray] = useState(flashCards);
+    let [flashCardsArray, setFlashCardsArray] = useState([]);
     const [endDialogVisible, setEndDialogVisible] = useState(false);
     const [roundDialogVisible, setRoundDialogVisible] = useState(false);
     const [currFlashCard, setCurrentFlashcard] = useState({});
@@ -32,9 +31,10 @@ export default TestScreen = ({ route, navigation }) => {
     }
 
     useEffect(() => {
-        shuffleArray(flashCardsArray);
-        setFlashCardsArray(flashCardsArray);
-        setCurrentFlashcard(flashCardsArray[0]);
+        const localFlashArray = [...flashCards];
+        shuffleArray(localFlashArray);
+        setFlashCardsArray(localFlashArray);
+        setCurrentFlashcard(localFlashArray[0]);
     }, []);
 
     const handleRounds = () => {
