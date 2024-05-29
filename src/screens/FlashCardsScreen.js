@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Database from "../services/Database";
 import { Button, Dialog, FAB, Portal, TextInput, Text, Surface, ToggleButton, useTheme } from "react-native-paper";
 import FlashCard from "../components/FlashCard";
+import NavBar from "../components/NavBar";
 
 export default FlashCardsScreen = ({ route, navigation }) => {
 
@@ -23,8 +24,11 @@ export default FlashCardsScreen = ({ route, navigation }) => {
     const screenWidth = Dimensions.get('window').width;
 
     useEffect(() => {
-        navigation.setOptions({ title: deckName });
-    }, []);
+        navigation.setOptions({
+            title: deckName,
+            header: (props) => <NavBar {...props} handleImport={handleImport} handleExport={handleExport} />
+        });
+    }, [navigation]);
 
     useEffect(() => {
         const getFlashCards = async () => {
@@ -37,6 +41,14 @@ export default FlashCardsScreen = ({ route, navigation }) => {
         };
         getFlashCards();
     }, []);
+
+    const handleImport = async () => {
+
+    }
+
+    const handleExport = async () => {
+
+    }
 
     const handleFlashCardAdd = async () => {
         try {
