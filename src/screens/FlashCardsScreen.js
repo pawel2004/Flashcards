@@ -5,6 +5,7 @@ import Database from "../services/Database";
 import { Button, Dialog, FAB, Portal, TextInput, Text, Surface, ToggleButton, useTheme } from "react-native-paper";
 import FlashCard from "../components/FlashCard";
 import NavBar from "../components/NavBar";
+import * as DocumentPicker from 'expo-document-picker';
 
 export default FlashCardsScreen = ({ route, navigation }) => {
 
