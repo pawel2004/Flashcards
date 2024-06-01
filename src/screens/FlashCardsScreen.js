@@ -6,6 +6,8 @@ import { Button, Dialog, FAB, Portal, TextInput, Text, Surface, ToggleButton, us
 import FlashCard from "../components/FlashCard";
 import NavBar from "../components/NavBar";
 import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
+import * as csvReader from 'react-native-csv';
 
 export default FlashCardsScreen = ({ route, navigation }) => {
 
@@ -44,7 +46,25 @@ export default FlashCardsScreen = ({ route, navigation }) => {
     }, []);
 
     const handleImport = async () => {
-
+        try {
+            const result = await DocumentPicker.getDocumentAsync({
+                copyToCacheDirectory: true,
+                type: 'text/csv'
+            });
+            if (!result.canceled) {
+                const uri = result.assets[0].uri;
+                const contents = await FileSystem.readAsStringAsync(uri);
+                const data = csvReader.readString(contents);
+                console.log(JSON.stringify(data, null, 5));
+            }
+        } catch (err) {
+            console.log(err);
+            ToastAndroid.showWithGravity(
+                'An error occured!',
+                ToastAndroid.BOTTOM,
+                ToastAndroid.SHORT
+            );
+        }
     }
 
     const handleExport = async () => {
