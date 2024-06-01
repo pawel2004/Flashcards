@@ -56,6 +56,8 @@ export default FlashCardsScreen = ({ route, navigation }) => {
                 const contents = await FileSystem.readAsStringAsync(uri);
                 const data = csvReader.readString(contents);
                 console.log(JSON.stringify(data, null, 5));
+                const res = await Database.addFlashCards(deckId, data.data);
+                console.log(res);
             }
         } catch (err) {
             console.log(err);
