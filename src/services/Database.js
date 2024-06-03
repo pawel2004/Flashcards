@@ -45,7 +45,6 @@ export default class Database {
             for (let e of flashcardsArray)
                 bindingArray.push(deckId, e[0], e[1]);
             tx.executeSql(query, bindingArray, (_, result) => {
-                console.log(result);
                 resolve(result.insertId);
             }, (_, err) => reject(err));
         }, (err) => reject(err)));

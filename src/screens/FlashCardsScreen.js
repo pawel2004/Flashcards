@@ -45,6 +45,14 @@ export default FlashCardsScreen = ({ route, navigation }) => {
         getFlashCards();
     }, []);
 
+    const isCSVValid = (csvJSON) => {
+        const data = csvJSON.data;
+        for (let record of data)
+            if (record.length !== 2)
+                return false;
+        return true;
+    }
+
     const handleImport = async () => {
         try {
             const result = await DocumentPicker.getDocumentAsync({
@@ -54,20 +62,31 @@ export default FlashCardsScreen = ({ route, navigation }) => {
             if (!result.canceled) {
                 const uri = result.assets[0].uri;
                 const contents = await FileSystem.readAsStringAsync(uri);
-                const data = csvReader.readString(contents);
-                console.log(JSON.stringify(data, null, 5));
-                const importedFlashcards = data.data;
-                const res = await Database.addFlashCards(deckId, importedFlashcards);
-                console.log(res);
-                const newFlashCards = importedFlashcards.map((e, i) => {
-                    return {
-                        FlashcardId: res - importedFlashcards.length + i,
-                        DeckId: deckId,
-                        Front: e[0],
-                        Rear: e[1]
-                    }
-                });
-                setFlashCardsArray((curr) => [...curr, ...newFlashCards]);
+                const csvJSON = csvReader.readString(contents);
+                if (isCSVValid(csvJSON)) {
+                    const importedFlashcards = csvJSON.data;
+                    const res = await Database.addFlashCards(deckId, importedFlashcards);
+                    const newFlashCards = importedFlashcards.map((e, i) => {
+                        return {
+                            FlashcardId: res - importedFlashcards.length + i,
+                            DeckId: deckId,
+                            Front: e[0],
+                            Rear: e[1]
+                        }
+                    });
+                    setFlashCardsArray((curr) => [...curr, ...newFlashCards]);
+                    ToastAndroid.showWithGravity(
+                        'Import successful!',
+                        ToastAndroid.BOTTOM,
+                        ToastAndroid.SHORT
+                    );
+                } else {
+                    ToastAndroid.showWithGravity(
+                        'File invalid!',
+                        ToastAndroid.BOTTOM,
+                        ToastAndroid.SHORT
+                    );
+                }
             }
         } catch (err) {
             console.log(err);
