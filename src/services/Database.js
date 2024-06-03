@@ -42,16 +42,13 @@ export default class Database {
         return new Promise((resolve, reject) => db.transaction(tx => {
             const query = `INSERT INTO Flashcards (DeckId, Front, Rear) VALUES ${flashcardsArray.map(() => '(?, ?, ?)').join(',')};`;
             const bindingArray = [];
-            for (let e of flashcardsArray) {
-                bindingArray.push(deckId);
-                bindingArray.push(e[0]);
-                bindingArray.push(e[1]);
-            }
+            for (let e of flashcardsArray)
+                bindingArray.push(deckId, e[0], e[1]);
             tx.executeSql(query, bindingArray, (_, result) => {
                 console.log(result);
                 resolve(result.insertId);
             }, (_, err) => reject(err));
-        }));
+        }, (err) => reject(err)));
     }
 
     static editDeck(id, newName) {

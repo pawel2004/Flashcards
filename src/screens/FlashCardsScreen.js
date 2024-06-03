@@ -56,11 +56,12 @@ export default FlashCardsScreen = ({ route, navigation }) => {
                 const contents = await FileSystem.readAsStringAsync(uri);
                 const data = csvReader.readString(contents);
                 console.log(JSON.stringify(data, null, 5));
-                const res = await Database.addFlashCards(deckId, data.data);
+                const importedFlashcards = data.data;
+                const res = await Database.addFlashCards(deckId, importedFlashcards);
                 console.log(res);
-                const newFlashCards = data.data.map((e, i) => {
+                const newFlashCards = importedFlashcards.map((e, i) => {
                     return {
-                        FlashcardId: res - data.data.length + i,
+                        FlashcardId: res - importedFlashcards.length + i,
                         DeckId: deckId,
                         Front: e[0],
                         Rear: e[1]
