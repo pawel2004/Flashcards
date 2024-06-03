@@ -48,8 +48,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
     const handleImport = async () => {
         try {
             const result = await DocumentPicker.getDocumentAsync({
-                copyToCacheDirectory: true,
-                type: 'text/csv'
+                copyToCacheDirectory: true
             });
             if (!result.canceled) {
                 const uri = result.assets[0].uri;

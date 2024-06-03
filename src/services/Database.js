@@ -39,14 +39,19 @@ export default class Database {
     }
 
     static addFlashCards(deckId, flashcardsArray) {
-        const insertIds = [];
         return new Promise((resolve, reject) => db.transaction(tx => {
-            for (const flashcard in flashcardsArray) {
-                tx.executeSql(`INSERT INTO Flashcards (DeckId, Front, Rear) VALUES (?, ?, ?);`, [deckId, flashcard.front, flashcard.rear], (_, result) => {
-                    insertIds.push(result.insertId);
-                }, (_, err) => reject(err));
+            const query = `INSERT INTO Flashcards (DeckId, Front, Rear) VALUES ${flashcardsArray.map(() => '(?, ?, ?)').join(',')};`;
+            const bindingArray = [];
+            for (let e of flashcardsArray) {
+                bindingArray.push(deckId);
+                bindingArray.push(e[0]);
+                bindingArray.push(e[1]);
             }
-        }, (err) => reject(err), () => resolve(insertIds)));
+            tx.executeSql(query, bindingArray, (_, result) => {
+                console.log(result);
+                resolve(result.rowsAffected);
+            }, (_, err) => reject(err));
+        }));
     }
 
     static editDeck(id, newName) {
