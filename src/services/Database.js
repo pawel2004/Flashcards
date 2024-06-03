@@ -49,7 +49,7 @@ export default class Database {
             }
             tx.executeSql(query, bindingArray, (_, result) => {
                 console.log(result);
-                resolve(result.rowsAffected);
+                resolve(result.insertId);
             }, (_, err) => reject(err));
         }));
     }

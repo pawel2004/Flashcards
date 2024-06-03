@@ -14,8 +14,8 @@ export default NavBar = ({ navigation, route, options, back, handleImport, handl
                 onDismiss={() => setVisible(false)}
                 anchor={<Appbar.Action onPress={() => setVisible(true)} icon='dots-vertical' />}
                 anchorPosition='bottom'>
-                <Menu.Item leadingIcon='import' title='Import' onPress={handleImport} />
-                <Menu.Item leadingIcon='export' title='Export' onPress={handleExport} />
+                <Menu.Item leadingIcon='import' title='Import' onPress={() => { setVisible(false); handleImport() }} />
+                <Menu.Item leadingIcon='export' title='Export' onPress={() => { setVisible(false); handleExport() }} />
             </Menu> : null}
         </Appbar.Header>
     )

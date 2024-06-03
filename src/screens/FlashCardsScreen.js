@@ -48,7 +48,8 @@ export default FlashCardsScreen = ({ route, navigation }) => {
     const handleImport = async () => {
         try {
             const result = await DocumentPicker.getDocumentAsync({
-                copyToCacheDirectory: true
+                copyToCacheDirectory: true,
+                type: 'text/*'
             });
             if (!result.canceled) {
                 const uri = result.assets[0].uri;
@@ -57,6 +58,15 @@ export default FlashCardsScreen = ({ route, navigation }) => {
                 console.log(JSON.stringify(data, null, 5));
                 const res = await Database.addFlashCards(deckId, data.data);
                 console.log(res);
+                const newFlashCards = data.data.map((e, i) => {
+                    return {
+                        FlashcardId: res - data.data.length + i,
+                        DeckId: deckId,
+                        Front: e[0],
+                        Rear: e[1]
+                    }
+                });
+                setFlashCardsArray((curr) => [...curr, ...newFlashCards]);
             }
         } catch (err) {
             console.log(err);
