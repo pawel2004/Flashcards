@@ -9,6 +9,7 @@ export default NavBar = ({ navigation, route, options, back, handleImport, handl
         <Appbar.Header>
             {back ? <Appbar.BackAction onPress={navigation.goBack} /> : null}
             <Appbar.Content title={title} />
+            {!back ? <Appbar.Action icon={'help'} onPress={() => navigation.navigate('Help')} /> : null}
             {handleImport ? <Menu
                 visible={visible}
                 onDismiss={() => setVisible(false)}
