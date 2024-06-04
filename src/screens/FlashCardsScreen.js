@@ -1,13 +1,14 @@
-import { View, StyleSheet, FlatList, ToastAndroid, Dimensions } from "react-native";
+import { View, StyleSheet, FlatList, ToastAndroid, Dimensions, ScrollView } from "react-native";
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from "react";
 import Database from "../services/Database";
-import { Button, Dialog, FAB, Portal, TextInput, Text, Surface, ToggleButton, useTheme } from "react-native-paper";
+import { Button, Dialog, FAB, Portal, TextInput, Text, Surface, ToggleButton, useTheme, Checkbox } from "react-native-paper";
 import FlashCard from "../components/FlashCard";
 import NavBar from "../components/NavBar";
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import * as csvReader from 'react-native-csv';
+import * as SecureStore from 'expo-secure-store';
 
 export default FlashCardsScreen = ({ route, navigation }) => {
 
@@ -16,6 +17,8 @@ export default FlashCardsScreen = ({ route, navigation }) => {
     const [flashCardsArray, setFlashCardsArray] = useState([]);
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+    const [helpDialogVisible, setHelpDialogVisible] = useState(false);
+    const [checkboxChecked, setCheckboxChecked] = useState(false);
     const [frontText, setFrontText] = useState('');
     const [rearText, setRearText] = useState('');
     const [flashIdToDelete, setFlashIdToDelete] = useState('');
@@ -29,9 +32,11 @@ export default FlashCardsScreen = ({ route, navigation }) => {
     useEffect(() => {
         navigation.setOptions({
             title: deckName,
-            header: (props) => <NavBar {...props} handleImport={handleImport} handleExport={handleExport} />
+            header: (props) => <NavBar {...props} handleImport={
+                (SecureStore.getItem('notShowImportHint') === 'true') ? handleImport : () => setHelpDialogVisible(true)
+            } handleExport={handleExport} />
         });
-    }, [navigation]);
+    }, [navigation, checkboxChecked]);
 
     useEffect(() => {
         const getFlashCards = async () => {
@@ -159,6 +164,16 @@ export default FlashCardsScreen = ({ route, navigation }) => {
         }
     }
 
+    const handleCheckbox = () => {
+        if (checkboxChecked) {
+            SecureStore.setItem('notShowImportHint', 'false');
+            setCheckboxChecked(false);
+        } else {
+            SecureStore.setItem('notShowImportHint', 'true');
+            setCheckboxChecked(true);
+        }
+    }
+
     return (
         <View style={styles.container}>
             <StatusBar style="auto"></StatusBar>
@@ -186,7 +201,21 @@ export default FlashCardsScreen = ({ route, navigation }) => {
                         <Button onPress={handleFlashCardDelete}>Yes</Button>
                     </Dialog.Actions>
                 </Dialog>
-            </Portal>
+                <Dialog visible={helpDialogVisible} onDismiss={() => { setHelpDialogVisible(false); handleImport() }}>
+                    <Dialog.Icon icon='information' />
+                    <Dialog.Title>Import hints</Dialog.Title>
+                    <Dialog.Content>
+                        <Text>1. Imported file must be in CSV format</Text>
+                        <Text>2. It shouldn't have a header row</Text>
+                        <Text>3. It should have two columns in each record (semicolon delimiter recommended)</Text>
+                        <Text>4. Data should be placed consistently. For example, the front side of a flashcard is in the first column, and the rear side is in the second</Text>
+                        <Checkbox.Item label='Do not show this again' status={checkboxChecked ? 'checked' : 'unchecked'} onPress={handleCheckbox} />
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                        <Button onPress={() => { setHelpDialogVisible(false); handleImport() }}>OK</Button>
+                    </Dialog.Actions>
+                </Dialog>
+            </Portal >
             <FlatList
                 data={flashCardsArray}
                 renderItem={(dataPiece) => <FlashCard flashId={dataPiece.item.FlashcardId} front={dataPiece.item.Front} rear={dataPiece.item.Rear} setFlashCardsArray={setFlashCardsArray} openDialog={openDeleteDialog} setSurfaceVisible={setSurfaceVisible} setEditedFlashesCounter={setEditedFlashesCounter} editedFlashesCounter={editedFlashesCounter} />}
@@ -211,7 +240,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
                     onPress={() => setAddDialogVisible(true)}
                 />
             </Surface>
-        </View>
+        </View >
     );
 };
 
