@@ -1,6 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 
-const db = SQLite.openDatabase("flashcards_P_G_1_3.db");
+const db = SQLite.openDatabase("flashcards_P_G_1_4.db");
 
 export default class Database {
     static prepareDatabase() {
@@ -36,6 +36,18 @@ export default class Database {
                 resolve(result.insertId);
             }, (_, err) => reject(err));
         }));
+    }
+
+    static addFlashCards(deckId, flashcardsArray) {
+        return new Promise((resolve, reject) => db.transaction(tx => {
+            const query = `INSERT INTO Flashcards (DeckId, Front, Rear) VALUES ${flashcardsArray.map(() => '(?, ?, ?)').join(',')};`;
+            const bindingArray = [];
+            for (let e of flashcardsArray)
+                bindingArray.push(deckId, e[0], e[1]);
+            tx.executeSql(query, bindingArray, (_, result) => {
+                resolve(result.insertId);
+            }, (_, err) => reject(err));
+        }, (err) => reject(err)));
     }
 
     static editDeck(id, newName) {

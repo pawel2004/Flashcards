@@ -1,4 +1,4 @@
-import { useColorScheme } from 'react-native';
+import { ToastAndroid, useColorScheme } from 'react-native';
 import { MD3LightTheme, MD3DarkTheme, PaperProvider } from 'react-native-paper';
 import { LightScheme } from './src/theme/lightScheme';
 import { DarkScheme } from './src/theme/darkScheme';
@@ -31,7 +31,13 @@ export default function App() {
     const initDatabase = async () => {
       try {
         await Database.prepareDatabase();
-      } catch (err) { }
+      } catch (err) {
+        ToastAndroid.showWithGravity(
+          'Database error!',
+          ToastAndroid.BOTTOM,
+          ToastAndroid.SHORT
+        );
+      }
     };
     initDatabase();
   }, []);
