@@ -1,4 +1,4 @@
-import { View, StyleSheet, FlatList, ToastAndroid, Dimensions, ScrollView } from "react-native";
+import { View, StyleSheet, FlatList, ToastAndroid, Dimensions } from "react-native";
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from "react";
 import Database from "../services/Database";
@@ -104,7 +104,26 @@ export default FlashCardsScreen = ({ route, navigation }) => {
     }
 
     const handleExport = async () => {
-
+        try {
+            const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+            if (permissions.granted) {
+                const filePath = await FileSystem.StorageAccessFramework.createFileAsync(permissions.directoryUri, `${deckName}.csv`, 'text/csv');
+                await FileSystem.StorageAccessFramework.writeAsStringAsync(filePath, '123');
+            } else {
+                ToastAndroid.showWithGravity(
+                    'Permissions denied!',
+                    ToastAndroid.BOTTOM,
+                    ToastAndroid.SHORT
+                );
+            }
+        } catch (err) {
+            console.log(err);
+            ToastAndroid.showWithGravity(
+                'Error occured!',
+                ToastAndroid.BOTTOM,
+                ToastAndroid.SHORT
+            );
+        }
     }
 
     const handleFlashCardAdd = async () => {
