@@ -6,7 +6,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import StackNavigator from './src/navigation/StackNavigator';
 import { useEffect } from 'react';
 import Database from './src/services/Database';
-import { StorageAccessFramework } from 'expo-file-system';
 
 const LightTheme = {
   ...MD3LightTheme,

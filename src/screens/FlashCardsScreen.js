@@ -103,12 +103,28 @@ export default FlashCardsScreen = ({ route, navigation }) => {
         }
     }
 
+    const prepareJSONToParsing = (inputJSON) => {
+        const outputJSON = [];
+        for (let object of inputJSON)
+            outputJSON.push([object.Front, object.Rear]);
+        return outputJSON;
+    }
+
     const handleExport = async () => {
         try {
             const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
             if (permissions.granted) {
                 const filePath = await FileSystem.StorageAccessFramework.createFileAsync(permissions.directoryUri, `${deckName}.csv`, 'text/csv');
-                await FileSystem.StorageAccessFramework.writeAsStringAsync(filePath, '123');
+                const flashcards = await Database.getFlashCardsFromDeck(deckId);
+                const preparedData = csvReader.jsonToCSV(prepareJSONToParsing(flashcards), {
+                    delimiter: ';'
+                });
+                await FileSystem.StorageAccessFramework.writeAsStringAsync(filePath, preparedData);
+                ToastAndroid.showWithGravity(
+                    'Export successful!',
+                    ToastAndroid.BOTTOM,
+                    ToastAndroid.SHORT
+                );
             } else {
                 ToastAndroid.showWithGravity(
                     'Permissions denied!',
