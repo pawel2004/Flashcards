@@ -28,17 +28,26 @@ const addDeck = async (name) => {
     return insertId;
 }
 
-const addFlashCard = (deckId, front, rear) => {
-    return new Promise((resolve, reject) => db.transaction(tx => {
-        tx.executeSql(`INSERT INTO Flashcards (DeckId, Front, Rear) VALUES (?, ?, ?);`, [deckId, front, rear], (_, result) => {
-            resolve(result.insertId);
-        }, (_, err) => reject(err));
-    }));
+const addFlashCard = async (deckId, front, rear) => {
+    const db = await SQLite.openDatabaseAsync(databaseName);
+    let insertId = 0;
+    await db.withExclusiveTransactionAsync(async () => {
+        const statement = await db.prepareAsync(`INSERT INTO Flashcards (DeckId, Front, Rear) VALUES ($deckId, $front, $rear);`);
+        insertId = (await statement.executeAsync({ $deckId: deckId, $front: front, $rear: rear })).lastInsertRowId;
+    });
+    return insertId;
 }
 
-const addFlashCards = (deckId, flashcardsArray) => {
+const addFlashCards = async (deckId, flashcardsArray) => {
+    const db = await SQLite.openDatabaseAsync(databaseName);
+    let insertId = 0;
+    await db.withExclusiveTransactionAsync(async () => {
+        const statement = await db.prepareAsync(`INSERT INTO Flashcards (DeckId, Front, Rear) VALUES ($deckId, front, rear);`);
+        insertId = (await statement.executeAsync({ $name: name })).lastInsertRowId;
+    });
+    return insertId;
     return new Promise((resolve, reject) => db.transaction(tx => {
-        const query = `INSERT INTO Flashcards (DeckId, Front, Rear) VALUES ${flashcardsArray.map(() => '(?, ?, ?)').join(',')};`;
+        const query = `INSERT INTO Flashcards (DeckId, Front, Rear) VALUES ($deckId, front, rear);`;
         const bindingArray = [];
         for (let e of flashcardsArray)
             bindingArray.push(deckId, e[0], e[1]);
