@@ -5,7 +5,7 @@ import { DarkScheme } from './src/theme/darkScheme';
 import { NavigationContainer } from '@react-navigation/native';
 import StackNavigator from './src/navigation/StackNavigator';
 import { useEffect } from 'react';
-import Database from './src/services/Database';
+import { prepareDatabase } from './src/services/Database';
 
 const LightTheme = {
   ...MD3LightTheme,
@@ -30,7 +30,7 @@ export default function App() {
   useEffect(() => {
     const initDatabase = async () => {
       try {
-        await Database.prepareDatabase();
+        await prepareDatabase();
       } catch (err) {
         ToastAndroid.showWithGravity(
           'Database error!',
