@@ -73,7 +73,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
                     const res = await addFlashCards(deckId, importedFlashcards);
                     const newFlashCards = importedFlashcards.map((e, i) => {
                         return {
-                            FlashcardId: res - importedFlashcards.length + i,
+                            FlashcardId: res - (importedFlashcards.length - 1) + i,
                             DeckId: deckId,
                             Front: e[0],
                             Rear: e[1]
@@ -94,7 +94,6 @@ export default FlashCardsScreen = ({ route, navigation }) => {
                 }
             }
         } catch (err) {
-            console.log(err);
             ToastAndroid.showWithGravity(
                 'An error occured!',
                 ToastAndroid.BOTTOM,
@@ -141,7 +140,6 @@ export default FlashCardsScreen = ({ route, navigation }) => {
                 );
             }
         } catch (err) {
-            console.log(err);
             ToastAndroid.showWithGravity(
                 'Error occured!',
                 ToastAndroid.BOTTOM,
@@ -163,7 +161,6 @@ export default FlashCardsScreen = ({ route, navigation }) => {
             setRearText('');
             setAddDialogVisible(false);
         } catch (err) {
-            console.log(err);
             ToastAndroid.showWithGravity(
                 'An error occured!',
                 ToastAndroid.SHORT,
@@ -175,7 +172,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
     const handleFlashCardDelete = async () => {
         try {
             await deleteFlashCard(flashIdToDelete);
-            setFlashCardsArray(flashCardsArray.filter(v => v.FlashcardId !== flashIdToDelete));
+            setFlashCardsArray((curr) => curr.filter(v => v.FlashcardId !== flashIdToDelete));
             ToastAndroid.showWithGravity(
                 'Deleted!',
                 ToastAndroid.SHORT,
@@ -183,7 +180,6 @@ export default FlashCardsScreen = ({ route, navigation }) => {
             );
             setDeleteDialogVisible(false);
         } catch (err) {
-            console.log(err);
             ToastAndroid.showWithGravity(
                 'An error occured!',
                 ToastAndroid.SHORT,
