@@ -1,7 +1,7 @@
 import { View, StyleSheet, FlatList, ToastAndroid } from "react-native";
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from "react";
-import { getDecks, addDeck } from "../services/Database";
+import { getDecks, addDeck, deleteDeck } from "../services/Database";
 import { Button, Dialog, FAB, HelperText, Portal, TextInput, Text } from "react-native-paper";
 import DeckCard from "../components/DeckCard";
 
@@ -53,7 +53,7 @@ export default DeckScreen = ({ navigation }) => {
 
     const handleDeckDelete = async () => {
         try {
-            await Database.deleteDeck(deckIdToDelete);
+            await deleteDeck(deckIdToDelete);
             setDecksArray(decksArray.filter((v) => v.DeckId !== deckIdToDelete));
             ToastAndroid.showWithGravity(
                 'Deleted!',

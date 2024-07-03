@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { StyleSheet, ToastAndroid } from "react-native";
 import { Card, IconButton, Text, TextInput, HelperText } from "react-native-paper";
-import Database from "../services/Database";
+import { editDeck } from "../services/Database";
 
 export default DeckCard = ({ deckId, deckName, openDialog, setDecksArray, navigation, setAddButtonVisible, editDecksCount, setEditDecksCount }) => {
 
@@ -15,7 +15,7 @@ export default DeckCard = ({ deckId, deckName, openDialog, setDecksArray, naviga
     const handleEdit = async () => {
         if (editedName !== '') {
             try {
-                await Database.editDeck(deckId, editedName);
+                await editDeck(deckId, editedName);
                 setDecksArray((decksArray) => decksArray.map((v) => {
                     if (v.DeckId === deckId)
                         v.Name = editedName;

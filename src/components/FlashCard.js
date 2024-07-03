@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { StyleSheet, ToastAndroid } from "react-native";
 import { Card, Divider, IconButton, Text, TextInput } from "react-native-paper";
-import Database from "../services/Database";
+import { editFlashCard } from "../services/Database";
 
 export default FlashCard = ({ flashId, front, rear, setFlashCardsArray, openDialog, setSurfaceVisible, setEditedFlashesCounter, editedFlashesCounter }) => {
 
@@ -11,7 +11,7 @@ export default FlashCard = ({ flashId, front, rear, setFlashCardsArray, openDial
 
     const handleEdit = async () => {
         try {
-            await Database.editFlashCard(flashId, editedFront, editedRear);
+            await editFlashCard(flashId, editedFront, editedRear);
             setFlashCardsArray(flashCardsArray => flashCardsArray.map(v => {
                 if (v.FlashcardId === flashId) {
                     v.Front = editedFront;

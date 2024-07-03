@@ -1,7 +1,7 @@
 import { View, StyleSheet, FlatList, ToastAndroid, Dimensions } from "react-native";
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from "react";
-import Database from "../services/Database";
+import { addFlashCard, addFlashCards, deleteFlashCard, getFlashCardsFromDeck } from "../services/Database";
 import { Button, Dialog, FAB, Portal, TextInput, Text, Surface, ToggleButton, useTheme, Checkbox } from "react-native-paper";
 import FlashCard from "../components/FlashCard";
 import NavBar from "../components/NavBar";
@@ -41,7 +41,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
     useEffect(() => {
         const getFlashCards = async () => {
             try {
-                const flashCards = await Database.getFlashCardsFromDeck(deckId);
+                const flashCards = await getFlashCardsFromDeck(deckId);
                 setFlashCardsArray(flashCards);
             } catch (err) {
 
@@ -70,7 +70,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
                 const csvJSON = csvReader.readString(contents);
                 if (isCSVValid(csvJSON)) {
                     const importedFlashcards = csvJSON.data;
-                    const res = await Database.addFlashCards(deckId, importedFlashcards);
+                    const res = await addFlashCards(deckId, importedFlashcards);
                     const newFlashCards = importedFlashcards.map((e, i) => {
                         return {
                             FlashcardId: res - importedFlashcards.length + i,
@@ -112,7 +112,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
 
     const handleExport = async () => {
         try {
-            const flashcards = await Database.getFlashCardsFromDeck(deckId);
+            const flashcards = await getFlashCardsFromDeck(deckId);
             if (flashcards.length === 0) {
                 ToastAndroid.showWithGravity(
                     'Nothing to export!',
@@ -152,7 +152,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
 
     const handleFlashCardAdd = async () => {
         try {
-            const newId = await Database.addFlashCard(deckId, frontText, rearText);
+            const newId = await addFlashCard(deckId, frontText, rearText);
             setFlashCardsArray([...flashCardsArray, {
                 FlashcardId: newId,
                 DeckId: deckId,
@@ -174,7 +174,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
 
     const handleFlashCardDelete = async () => {
         try {
-            await Database.deleteFlashCard(flashIdToDelete);
+            await deleteFlashCard(flashIdToDelete);
             setFlashCardsArray(flashCardsArray.filter(v => v.FlashcardId !== flashIdToDelete));
             ToastAndroid.showWithGravity(
                 'Deleted!',
