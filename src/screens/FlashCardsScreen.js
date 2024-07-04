@@ -1,9 +1,14 @@
 import { View, StyleSheet, FlatList, ToastAndroid, Dimensions } from "react-native";
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from "react";
-import Database from "../services/Database";
-import { Button, Dialog, FAB, Portal, TextInput, Text, Surface, ToggleButton, useTheme } from "react-native-paper";
+import { addFlashCard, addFlashCards, deleteFlashCard, getFlashCardsFromDeck } from "../services/Database";
+import { Button, Dialog, FAB, Portal, TextInput, Text, Surface, ToggleButton, useTheme, Checkbox } from "react-native-paper";
 import FlashCard from "../components/FlashCard";
+import NavBar from "../components/NavBar";
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
+import * as csvReader from 'react-native-csv';
+import * as SecureStore from 'expo-secure-store';
 
 export default FlashCardsScreen = ({ route, navigation }) => {
 
@@ -12,6 +17,8 @@ export default FlashCardsScreen = ({ route, navigation }) => {
     const [flashCardsArray, setFlashCardsArray] = useState([]);
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+    const [helpDialogVisible, setHelpDialogVisible] = useState(false);
+    const [checkboxChecked, setCheckboxChecked] = useState(false);
     const [frontText, setFrontText] = useState('');
     const [rearText, setRearText] = useState('');
     const [flashIdToDelete, setFlashIdToDelete] = useState('');
@@ -23,13 +30,18 @@ export default FlashCardsScreen = ({ route, navigation }) => {
     const screenWidth = Dimensions.get('window').width;
 
     useEffect(() => {
-        navigation.setOptions({ title: deckName });
-    }, []);
+        navigation.setOptions({
+            title: deckName,
+            header: (props) => <NavBar {...props} handleImport={
+                (SecureStore.getItem('notShowImportHint') === 'true') ? handleImport : () => setHelpDialogVisible(true)
+            } handleExport={handleExport} />
+        });
+    }, [navigation, checkboxChecked]);
 
     useEffect(() => {
         const getFlashCards = async () => {
             try {
-                const flashCards = await Database.getFlashCardsFromDeck(deckId);
+                const flashCards = await getFlashCardsFromDeck(deckId);
                 setFlashCardsArray(flashCards);
             } catch (err) {
 
@@ -38,9 +50,107 @@ export default FlashCardsScreen = ({ route, navigation }) => {
         getFlashCards();
     }, []);
 
+    const isCSVValid = (csvJSON) => {
+        const data = csvJSON.data;
+        for (let record of data)
+            if (record.length !== 2)
+                return false;
+        return true;
+    }
+
+    const handleImport = async () => {
+        try {
+            const result = await DocumentPicker.getDocumentAsync({
+                copyToCacheDirectory: true,
+                type: 'text/*'
+            });
+            if (!result.canceled) {
+                const uri = result.assets[0].uri;
+                const contents = await FileSystem.readAsStringAsync(uri);
+                const csvJSON = csvReader.readString(contents);
+                if (isCSVValid(csvJSON)) {
+                    const importedFlashcards = csvJSON.data;
+                    const res = await addFlashCards(deckId, importedFlashcards);
+                    const newFlashCards = importedFlashcards.map((e, i) => {
+                        return {
+                            FlashcardId: res - (importedFlashcards.length - 1) + i,
+                            DeckId: deckId,
+                            Front: e[0],
+                            Rear: e[1]
+                        }
+                    });
+                    setFlashCardsArray((curr) => [...curr, ...newFlashCards]);
+                    ToastAndroid.showWithGravity(
+                        'Import successful!',
+                        ToastAndroid.BOTTOM,
+                        ToastAndroid.SHORT
+                    );
+                } else {
+                    ToastAndroid.showWithGravity(
+                        'File invalid!',
+                        ToastAndroid.BOTTOM,
+                        ToastAndroid.SHORT
+                    );
+                }
+            }
+        } catch (err) {
+            ToastAndroid.showWithGravity(
+                'An error occured!',
+                ToastAndroid.BOTTOM,
+                ToastAndroid.SHORT
+            );
+        }
+    }
+
+    const prepareJSONToParsing = (inputJSON) => {
+        const outputJSON = [];
+        for (let object of inputJSON)
+            outputJSON.push([object.Front, object.Rear]);
+        return outputJSON;
+    }
+
+    const handleExport = async () => {
+        try {
+            const flashcards = await getFlashCardsFromDeck(deckId);
+            if (flashcards.length === 0) {
+                ToastAndroid.showWithGravity(
+                    'Nothing to export!',
+                    ToastAndroid.BOTTOM,
+                    ToastAndroid.SHORT
+                );
+                throw 'Nothing to export';
+            }
+            const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+            if (permissions.granted) {
+                const filePath = await FileSystem.StorageAccessFramework.createFileAsync(permissions.directoryUri, `${deckName}.csv`, 'text/csv');
+                const preparedData = csvReader.jsonToCSV(prepareJSONToParsing(flashcards), {
+                    delimiter: ';'
+                });
+                await FileSystem.StorageAccessFramework.writeAsStringAsync(filePath, preparedData);
+                ToastAndroid.showWithGravity(
+                    'Export successful!',
+                    ToastAndroid.BOTTOM,
+                    ToastAndroid.SHORT
+                );
+            } else {
+                ToastAndroid.showWithGravity(
+                    'Permissions denied!',
+                    ToastAndroid.BOTTOM,
+                    ToastAndroid.SHORT
+                );
+            }
+        } catch (err) {
+            ToastAndroid.showWithGravity(
+                'Error occured!',
+                ToastAndroid.BOTTOM,
+                ToastAndroid.SHORT
+            );
+        }
+    }
+
     const handleFlashCardAdd = async () => {
         try {
-            const newId = await Database.addFlashCard(deckId, frontText, rearText);
+            const newId = await addFlashCard(deckId, frontText, rearText);
             setFlashCardsArray([...flashCardsArray, {
                 FlashcardId: newId,
                 DeckId: deckId,
@@ -51,7 +161,6 @@ export default FlashCardsScreen = ({ route, navigation }) => {
             setRearText('');
             setAddDialogVisible(false);
         } catch (err) {
-            console.log(err);
             ToastAndroid.showWithGravity(
                 'An error occured!',
                 ToastAndroid.SHORT,
@@ -62,8 +171,8 @@ export default FlashCardsScreen = ({ route, navigation }) => {
 
     const handleFlashCardDelete = async () => {
         try {
-            await Database.deleteFlashCard(flashIdToDelete);
-            setFlashCardsArray(flashCardsArray.filter(v => v.FlashcardId !== flashIdToDelete));
+            await deleteFlashCard(flashIdToDelete);
+            setFlashCardsArray((curr) => curr.filter(v => v.FlashcardId !== flashIdToDelete));
             ToastAndroid.showWithGravity(
                 'Deleted!',
                 ToastAndroid.SHORT,
@@ -71,7 +180,6 @@ export default FlashCardsScreen = ({ route, navigation }) => {
             );
             setDeleteDialogVisible(false);
         } catch (err) {
-            console.log(err);
             ToastAndroid.showWithGravity(
                 'An error occured!',
                 ToastAndroid.SHORT,
@@ -92,6 +200,16 @@ export default FlashCardsScreen = ({ route, navigation }) => {
         } else {
             setTestNormalMode(true);
             setToggleState('unchecked');
+        }
+    }
+
+    const handleCheckbox = () => {
+        if (checkboxChecked) {
+            SecureStore.setItem('notShowImportHint', 'false');
+            setCheckboxChecked(false);
+        } else {
+            SecureStore.setItem('notShowImportHint', 'true');
+            setCheckboxChecked(true);
         }
     }
 
@@ -122,7 +240,21 @@ export default FlashCardsScreen = ({ route, navigation }) => {
                         <Button onPress={handleFlashCardDelete}>Yes</Button>
                     </Dialog.Actions>
                 </Dialog>
-            </Portal>
+                <Dialog visible={helpDialogVisible} onDismiss={() => { setHelpDialogVisible(false); handleImport() }}>
+                    <Dialog.Icon icon='information' />
+                    <Dialog.Title>Import hints</Dialog.Title>
+                    <Dialog.Content>
+                        <Text>1. Imported file must be in CSV format</Text>
+                        <Text>2. It shouldn't have a header row</Text>
+                        <Text>3. It should have two columns in each record (semicolon delimiter recommended)</Text>
+                        <Text>4. Data should be placed consistently. For example, the front side of a flashcard is in the first column, and the rear side is in the second</Text>
+                        <Checkbox.Item label='Do not show this again' status={checkboxChecked ? 'checked' : 'unchecked'} onPress={handleCheckbox} />
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                        <Button onPress={() => { setHelpDialogVisible(false); handleImport() }}>OK</Button>
+                    </Dialog.Actions>
+                </Dialog>
+            </Portal >
             <FlatList
                 data={flashCardsArray}
                 renderItem={(dataPiece) => <FlashCard flashId={dataPiece.item.FlashcardId} front={dataPiece.item.Front} rear={dataPiece.item.Rear} setFlashCardsArray={setFlashCardsArray} openDialog={openDeleteDialog} setSurfaceVisible={setSurfaceVisible} setEditedFlashesCounter={setEditedFlashesCounter} editedFlashesCounter={editedFlashesCounter} />}
@@ -147,7 +279,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
                     onPress={() => setAddDialogVisible(true)}
                 />
             </Surface>
-        </View>
+        </View >
     );
 };
 

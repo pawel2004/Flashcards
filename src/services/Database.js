@@ -1,87 +1,119 @@
 import * as SQLite from 'expo-sqlite';
 
-const db = SQLite.openDatabase("flashcards_P_G_1_3.db");
+const databaseName = 'flashcards_P_G_2_0.db';
 
-export default class Database {
-    static prepareDatabase() {
-        return new Promise((resolve, reject) => db.transaction(tx => {
-            tx.executeSql(
-                `CREATE TABLE IF NOT EXISTS Decks (
+const prepareDatabase = async () => {
+    const db = await SQLite.openDatabaseAsync(databaseName);
+    await db.withExclusiveTransactionAsync(async () => {
+        await db.execAsync(`CREATE TABLE IF NOT EXISTS Decks (
                     DeckId INTEGER PRIMARY KEY NOT NULL,
                     Name varchar(255) NOT NULL
-                );`
-            );
-            tx.executeSql(
-                `CREATE TABLE IF NOT EXISTS Flashcards (
+                );`);
+        await db.execAsync(`CREATE TABLE IF NOT EXISTS Flashcards (
                     FlashcardId INTEGER PRIMARY KEY NOT NULL,
                     DeckId INTEGER NOT NULL,
                     Front text NOT NULL,
                     Rear text NOT NULL
-                );`
-            );
-        }, (err) => reject(err), () => resolve()));
-    }
+                );`);
+    });
+}
 
-    static addDeck(name) {
-        return new Promise((resolve, reject) => db.transaction(tx => {
-            tx.executeSql(`INSERT INTO Decks (Name) VALUES (?);`, [name], (_, result) => {
-                resolve(result.insertId);
-            }, (_, err) => reject(err));
-        }));
-    }
+const addDeck = async (name) => {
+    const db = await SQLite.openDatabaseAsync(databaseName);
+    let insertId = 0;
+    await db.withExclusiveTransactionAsync(async () => {
+        const statement = await db.prepareAsync(`INSERT INTO Decks (Name) VALUES ($name);`);
+        insertId = (await statement.executeAsync({ $name: name })).lastInsertRowId;
+    });
+    return insertId;
+}
 
-    static addFlashCard(deckId, front, rear) {
-        return new Promise((resolve, reject) => db.transaction(tx => {
-            tx.executeSql(`INSERT INTO Flashcards (DeckId, Front, Rear) VALUES (?, ?, ?);`, [deckId, front, rear], (_, result) => {
-                resolve(result.insertId);
-            }, (_, err) => reject(err));
-        }));
-    }
+const addFlashCard = async (deckId, front, rear) => {
+    const db = await SQLite.openDatabaseAsync(databaseName);
+    let insertId = 0;
+    await db.withExclusiveTransactionAsync(async () => {
+        const statement = await db.prepareAsync(`INSERT INTO Flashcards (DeckId, Front, Rear) VALUES ($deckId, $front, $rear);`);
+        insertId = (await statement.executeAsync({ $deckId: deckId, $front: front, $rear: rear })).lastInsertRowId;
+    });
+    return insertId;
+}
 
-    static editDeck(id, newName) {
-        return new Promise((resolve, reject) => db.transaction(tx => {
-            tx.executeSql("UPDATE Decks SET Name = ? WHERE DeckId = ?;", [newName, id]);
-        }, (err) => reject(err), () => resolve()));
-    }
+const addFlashCards = async (deckId, flashcardsArray) => {
+    const db = await SQLite.openDatabaseAsync(databaseName);
+    let insertId = 0;
+    await db.withExclusiveTransactionAsync(async () => {
+        const statement = await db.prepareAsync(`INSERT INTO Flashcards (DeckId, Front, Rear) VALUES ($deckId, $front, $rear);`);
+        for (let flashcard of flashcardsArray)
+            insertId = (await statement.executeAsync({ $deckId: deckId, $front: flashcard[0], $rear: flashcard[1] })).lastInsertRowId;
+    });
+    return insertId;
+}
 
-    static editFlashCard(id, newFront, newRear) {
-        return new Promise((resolve, reject) => db.transaction(tx => {
-            tx.executeSql("UPDATE Flashcards SET Front=?, Rear=? WHERE FlashcardId = ?;", [newFront, newRear, id]);
-        }, (err) => reject(err), () => resolve()));
-    }
+const editDeck = async (id, newName) => {
+    const db = await SQLite.openDatabaseAsync(databaseName);
+    await db.withExclusiveTransactionAsync(async () => {
+        const statement = await db.prepareAsync(`UPDATE Decks SET Name = $newName WHERE DeckId = $deckId;`);
+        await statement.executeAsync({ $newName: newName, $deckId: id });
+    });
+}
 
-    static getDecks() {
-        const query = "SELECT * FROM Decks;"
-        return new Promise((resolve, reject) => db.transaction(tx => {
-            tx.executeSql(query, [], (_, results) => {
-                resolve(results.rows._array);
-            }, (_, error) => {
-                reject(error);
-            });
-        }))
-    }
+const editFlashCard = async (id, newFront, newRear) => {
+    const db = await SQLite.openDatabaseAsync(databaseName);
+    await db.withExclusiveTransactionAsync(async () => {
+        const statement = await db.prepareAsync(`UPDATE Flashcards SET Front=$newFront, Rear=$newRear WHERE FlashcardId = $flashcardId;`);
+        await statement.executeAsync({ $newFront: newFront, $newRear: newRear, $flashcardId: id });
+    });
+}
 
-    static getFlashCardsFromDeck(deckId) {
-        const query = `SELECT FlashcardId, Front, Rear FROM Flashcards WHERE DeckId = ${deckId};`;
-        return new Promise((resolve, reject) => db.transaction(tx => {
-            tx.executeSql(query, [], (_, results) => {
-                resolve(results.rows._array);
-            }, (_, error) => {
-                reject(error);
-            });
-        }))
-    }
+const getDecks = async () => {
+    const db = await SQLite.openDatabaseAsync(databaseName);
+    let rows = [];
+    await db.withExclusiveTransactionAsync(async () => {
+        const statement = await db.prepareAsync('SELECT * FROM Decks;');
+        const result = await statement.executeAsync();
+        rows = await result.getAllAsync();
+    });
+    return rows;
+}
 
-    static deleteDeck(id) {
-        return new Promise((resolve, reject) => db.transaction(tx => {
-            tx.executeSql(`DELETE FROM Decks WHERE DeckId = ?;`, [id]);
-            tx.executeSql('DELETE FROM Flashcards WHERE DeckId = ?;', [id]);
-        }, (err) => reject(err), () => resolve()));
-    }
+const getFlashCardsFromDeck = async (deckId) => {
+    const db = await SQLite.openDatabaseAsync(databaseName);
+    let rows = [];
+    await db.withExclusiveTransactionAsync(async () => {
+        const statement = await db.prepareAsync('SELECT FlashcardId, Front, Rear FROM Flashcards WHERE DeckId = $deckId;');
+        const result = await statement.executeAsync({ $deckId: deckId });
+        rows = await result.getAllAsync();
+    });
+    return rows;
+}
 
-    static deleteFlashCard(id) {
-        return new Promise((resolve, reject) => db.transaction(tx => {
-            tx.executeSql(`DELETE FROM Flashcards WHERE FlashcardId = ?;`, [id]);
-        }, (err) => reject(err), () => resolve()));
-    }
+const deleteDeck = async (id) => {
+    const db = await SQLite.openDatabaseAsync(databaseName);
+    await db.withExclusiveTransactionAsync(async () => {
+        const statement1 = await db.prepareAsync(`DELETE FROM Decks WHERE DeckId = $deckId;`);
+        await statement1.executeAsync({ $deckId: id });
+        const statement2 = await db.prepareAsync(`DELETE FROM Flashcards WHERE DeckId = $deckId;`);
+        await statement2.executeAsync({ $deckId: id });
+    });
+}
+
+const deleteFlashCard = async (id) => {
+    const db = await SQLite.openDatabaseAsync(databaseName);
+    await db.withExclusiveTransactionAsync(async () => {
+        const statement = await db.prepareAsync(`DELETE FROM Flashcards WHERE FlashcardId = $flashcardId;`);
+        await statement.executeAsync({ $flashcardId: id });
+    });
+}
+
+export {
+    prepareDatabase,
+    addDeck,
+    addFlashCard,
+    addFlashCards,
+    deleteDeck,
+    deleteFlashCard,
+    editDeck,
+    editFlashCard,
+    getDecks,
+    getFlashCardsFromDeck
 }

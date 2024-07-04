@@ -1,7 +1,7 @@
 import { View, StyleSheet, FlatList, ToastAndroid } from "react-native";
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from "react";
-import Database from "../services/Database";
+import { getDecks, addDeck, deleteDeck } from "../services/Database";
 import { Button, Dialog, FAB, HelperText, Portal, TextInput, Text } from "react-native-paper";
 import DeckCard from "../components/DeckCard";
 
@@ -16,15 +16,15 @@ export default DeckScreen = ({ navigation }) => {
     const [editDecksCount, setEditDecksCount] = useState(0);
 
     useEffect(() => {
-        const getDecks = async () => {
+        const getDecksFunc = async () => {
             try {
-                const decks = await Database.getDecks();
+                const decks = await getDecks();
                 setDecksArray(decks);
             } catch (err) {
 
             }
         };
-        getDecks();
+        getDecksFunc();
     }, []);
 
     const nameRequired = () => {
@@ -34,7 +34,7 @@ export default DeckScreen = ({ navigation }) => {
     const handleDeckAdd = async () => {
         if (deckNameInputText !== '') {
             try {
-                const newId = await Database.addDeck(deckNameInputText);
+                const newId = await addDeck(deckNameInputText);
                 setDecksArray([...decksArray, {
                     DeckId: newId,
                     Name: deckNameInputText
@@ -53,8 +53,8 @@ export default DeckScreen = ({ navigation }) => {
 
     const handleDeckDelete = async () => {
         try {
-            await Database.deleteDeck(deckIdToDelete);
-            setDecksArray(decksArray.filter((v) => v.DeckId !== deckIdToDelete));
+            await deleteDeck(deckIdToDelete);
+            setDecksArray((curr) => curr.filter((v) => v.DeckId !== deckIdToDelete));
             ToastAndroid.showWithGravity(
                 'Deleted!',
                 ToastAndroid.SHORT,
