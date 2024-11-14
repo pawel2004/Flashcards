@@ -53,7 +53,7 @@ export default FlashCardsScreen = ({ route, navigation }) => {
     const isCSVValid = (csvJSON) => {
         const data = csvJSON.data;
         for (let record of data)
-            if (record.length !== 2)
+            if (record.length !== 2 && record[0].length !== 0)
                 return false;
         return true;
     }
@@ -66,10 +66,14 @@ export default FlashCardsScreen = ({ route, navigation }) => {
             });
             if (!result.canceled) {
                 const uri = result.assets[0].uri;
-                const contents = await FileSystem.readAsStringAsync(uri);
-                const csvJSON = csvReader.readString(contents);
+                const contents = await FileSystem.readAsStringAsync(uri, { encoding: 'utf8' });
+                const csvJSON = csvReader.readString(contents, { delimiter: ';' });
                 if (isCSVValid(csvJSON)) {
                     const importedFlashcards = csvJSON.data;
+                    // Remove empty last line if exists
+                    if (importedFlashcards.at(-1)[0].length === 0) {
+                        importedFlashcards.pop()
+                    }
                     const res = await addFlashCards(deckId, importedFlashcards);
                     const newFlashCards = importedFlashcards.map((e, i) => {
                         return {

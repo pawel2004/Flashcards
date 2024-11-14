@@ -12,7 +12,7 @@ export default HelpScreen = ({ navigation }) => {
                 <Dialog.Content>
                     <Text>1. Imported file must be in CSV format</Text>
                     <Text>2. It shouldn't have a header row</Text>
-                    <Text>3. It should have two columns in each record(semicolon delimiter recommended)</Text>
+                    <Text>3. It should have two columns in each record (semicolon delimiter is a must)</Text>
                     <Text>4. Data should be placed consistently. For example, the front side of a flashcard is in the first column, and the rear side is in the second</Text>
                 </Dialog.Content>
         },
